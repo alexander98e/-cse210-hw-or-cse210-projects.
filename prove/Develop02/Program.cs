@@ -1,3 +1,5 @@
+using System;
+
 class Entry
 {
     public DateTime Occurs { get; set; }
@@ -36,9 +38,9 @@ public List<Entry> FindEntries(DateTime date, bool byTime)
     List<Entry> found = new List<Entry>();
     foreach (Entry entry in entries)
     {
-        if (((byTime) && (entry.Occurs == date)) // filtered by time and date
+        if (((byTime) && (entry.Occurs == date)) 
         ||
-        ((!byTime) && (entry.Occurs.Date == date.Date))) // filtered by date only
+        ((!byTime) && (entry.Occurs.Date == date.Date))) 
             found.Add(entry);
     }
     return found;
@@ -88,11 +90,11 @@ public void AddEntry()
 }
 public void SearchEntries()
 {
-    // Entering the date
+    
     DateTime dateTime = ReadDateTime();
-    // Searching for entries
+    
     List<Entry> entries = database.FindEntries(dateTime, false);
-    // Printing entries
+    
     if (entries.Count() > 0)
     {
         Console.WriteLine("Entries found: ");
@@ -100,7 +102,7 @@ public void SearchEntries()
             Console.WriteLine(entry);
     }
     else
-        // Nothing found
+        
         Console.WriteLine("No entries were found.");
 }
 public void DeleteEntries()
@@ -116,7 +118,8 @@ public void PrintHomeScreen()
     Console.WriteLine("Welcome!");
     Console.WriteLine("Today is: {0}", DateTime.Now);
     Console.WriteLine();
-    // printing the home screen
+  
+
     Console.WriteLine("Today:\n------");
     PrintEntries(DateTime.Today);
     Console.WriteLine();
@@ -127,10 +130,11 @@ public void PrintHomeScreen()
 
 static void Main(string[] args)
 {
-    // diary instance
+   
     Diary diary = new Diary();
     char choice = '0';
-    // main loop
+    
+
     while (choice != '4')
     {
         diary.PrintHomeScreen();
@@ -142,7 +146,8 @@ static void Main(string[] args)
         Console.WriteLine("4 - Exit");
         choice = Console.ReadKey().KeyChar;
         Console.WriteLine();
-        // reaction to the choice
+      
+      
         switch (choice)
         {
             case '1':
