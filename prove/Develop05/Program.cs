@@ -1,125 +1,144 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
-class Goal
+//base for all goals
+public abstract class Goal
 {
     public string Name { get; set; }
-    public int Value { get; set; }
-    public bool Completed { get; set; }
-}
+    public int Points { get; set; }
 
-class SimpleGoal : Goal
-{
-    public SimpleGoal(string name, int value)
+    public Goal(string name, int points)
     {
         Name = name;
-        Value = value;
-        Completed = false;
+        Points = points;
     }
 
-    public void Complete()
-    {
-        Completed = true;
-    }
+    public abstract void RecordEvent();
+    public abstract string GetStatus();
 }
 
-class EternalGoal : Goal
+// Define eahc class for goal
+public class SimpleGoal : Goal
 {
-    public EternalGoal(string name, int value)
+    public SimpleGoal(string name, int points) : base(name, points) {}
+
+    public override void RecordEvent()
     {
-        Name = name;
-        Value = value;
-        Completed = false;
+        Console.WriteLine($"Completed goal: {Name} (+{Points} points)");
     }
 
-    public void Record()
+    public override string GetStatus()
     {
-        Completed = false;
+        return "[ ] " + Name;
     }
 }
 
-class ChecklistGoal : Goal
+public class EternalGoal : Goal
 {
-    public int Count { get; set; }
-    public int Total { get; set; }
-    public int Bonus { get; set; }
+    private int _count = 0;
 
-    public ChecklistGoal(string name, int value, int total, int bonus)
+    public EternalGoal(string name, int points) : base(name, points) {}
+
+    public override void RecordEvent()
     {
-        Name = name;
-        Value = value;
-        Total = total;
-        Bonus = bonus;
-        Count = 0;
-        Completed = false;
+        _count++;
+        Console.WriteLine($"Recorded progress on goal: {Name} (+{Points} points)");
     }
 
-    public void Record()
+    public override string GetStatus()
     {
-        Count++;
-        if (Count == Total)
+        return $"{_count}x {Name}";
+    }
+}
+
+public class ChecklistGoal : Goal
+{
+    private int _count = 0;
+    private int _targetCount;
+
+    public ChecklistGoal(string name, int points, int targetCount) : base(name, points)
+    {
+        _targetCount = targetCount;
+    }
+
+    public override void RecordEvent()
+    {
+        _count++;
+        Console.WriteLine($"Recorded progress on goal: {Name} (+{Points} points)");
+
+        if (_count == _targetCount)
         {
-            Completed = true;
-        }
-    }
-}
-
-class EternalQuest
-{
-    List<Goal> Goals = new List<Goal>();
-    int Score { get; set; }
-
-    public void CreateGoal(string type, string name, int value, int total = 0, int bonus = 0)
-    {
-        switch (type)
-        {
-            case "Simple":
-                Goals.Add(new SimpleGoal(name, value));
-                break;
-            case "Eternal":
-                Goals.Add(new EternalGoal(name, value));
-                break;
-            case "Checklist":
-                Goals.Add(new ChecklistGoal(name, value, total, bonus));
-                break;
-            default:
-                Console.WriteLine("Invalid goal type.");
-                break;
+            Points += 500;
+            Console.WriteLine($"Completed goal: {Name} (+500 bonus points)");
         }
     }
 
-    public void RecordGoal(string name)
+    public override string GetStatus()
     {
-        var goal = Goals.FirstOrDefault(g => g.Name == name);
-        if (goal == null)
+        return $"Completed {_count}/{_targetCount} times: {Name}";
+    }
+}
+
+// mai eternal quest
+public class EternalQuest
+{
+    private List<Goal> _goals = new List<Goal>();
+
+    public void AddGoal(Goal goal)
+    {
+        _goals.Add(goal);
+        Console.WriteLine($"Added goal: {goal.Name}");
+    }
+
+    public void RecordEvent(string name)
+    {
+        foreach (Goal goal in _goals)
         {
-            Console.WriteLine("Goal not found.");
-        }
-        else
-        {
-            goal.Record();
-            if (goal is ChecklistGoal)
+            if (goal.Name == name)
             {
-                Score += ((ChecklistGoal)goal).Count * goal.Value;
-                if (((ChecklistGoal)goal).Count == ((ChecklistGoal)goal).Total)
-                {
-                    Score += ((ChecklistGoal)goal).Bonus;
-                }
-            }
-            else
-            {
-                Score += goal.Value;
+                goal.RecordEvent();
+                return;
             }
         }
+
+        Console.WriteLine($"Goal not found: {name}");
     }
 
-    public void DisplayGoals()
+    public void DisplayStatus()
     {
-        Console.WriteLine("Goals:");
-        foreach (var goal in Goals)
+        int totalPoints = 0;
+
+        Console.WriteLine("Current Goals:");
+        foreach (Goal goal in _goals)
         {
-            if (goal is ChecklistGoal)
-            {
-                Console.WriteLine($"{goal.Name} ({((ChecklistGoal)
+            Console.WriteLine(goal.GetStatus());
+            totalPoints += goal.Points;
+        }
+
+        Console.WriteLine($"Total Points: {totalPoints}");
+    }
+}
+
+
+public static void Main()
+{
+    EternalQuest quest = new EternalQuest();
+
+    
+    quest.AddGoal(new SimpleGoal("Run a Marathon", 1000));
+    quest.AddGoal(new EternalGoal("Read Scriptures", 100));
+    quest.AddGoal(new ChecklistGoal("Attend Temple", 50, 10));
+
+    
+    quest.RecordEvent("Read Scriptures");
+    quest.RecordEvent("Read Scriptures");
+    quest.RecordEvent("Attend Temple");
+    quest.RecordEvent("Attend Temple");
+    quest.RecordEvent("Attend Temple");
+    quest.RecordEvent("Attend Temple");
+    quest.RecordEvent("Attend Temple");
+    quest.RecordEvent("Attend Temple");
+    
+    quest.DisplayStatus();
+}
+
