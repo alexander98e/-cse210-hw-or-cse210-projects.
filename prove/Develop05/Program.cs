@@ -1,93 +1,115 @@
-using System;
+using System.Security.Cryptography.X509Certificates;
+public abstract class Goal
+{
+    public string Name { get; set; }
+    public int Value { get; set; }
+    public int Points { get; set; }
+    public bool IsCompleted { get; set; }
+X500DistinguishedName
+    public virtual void MarkCompleted()
+    {
+        IsCompleted = true;
+    }
+}
+
+public class SimpleGoal : Goal
+{
+    public SimpleGoal(string name, int value, int points)
+    {
+        Name = name;
+        Value = value;
+        Points = points;
+    }
+}
+
+public class EternalGoal : Goal
+{
+    public EternalGoal(string name, int value, int points)
+    {
+        Name = name;
+        Value = value;
+        Points = points;
+    }
+
+    public override void MarkCompleted()
+    {
+        Points += Value;
+    }
+}
 
 public class ChecklistGoal : Goal
 {
-    // Attributes
-    private string _type = "Check List Goal:";
-    private int _numberTimes;
-    private int _bonusPoints;
-    private bool _status;
-    private int _count;
+    public int Target { get; set; }
+    public int Count { get; set; }
 
-
-    // Constructors
-    public ChecklistGoal(string type, string name, string description, int points, int numberTimes, int bonusPoints) : base(type, name, description, points)
+    public ChecklistGoal(string name, int value, int points, int target)
     {
-        _status = false;
-        _numberTimes = numberTimes;
-        _bonusPoints = bonusPoints;
-        _count = 0;
-    }
-    public ChecklistGoal(string type, string name, string description, int points, bool status, int numberTimes, int bonusPoints, int count) : base(type, name, description, points)
-    {
-        _status = status;
-        _numberTimes = numberTimes;
-        _bonusPoints = bonusPoints;
-        _count = count;
+        Name = name;
+        Value = value;
+        Points = points;
+        Target = target;
     }
 
-    public int GetTimes()
+    public override void MarkCompleted()
     {
-        return _numberTimes;
-    }
-    public void SetTimes()
-    {
-        _count = _count + 1;
-    }
-     public int GetCount()
-    {
-        return _count;
-    }
-    public void SetCount()
-    {
-
-    }
-     public int GetBonusPoints()
-    {
-        return _bonusPoints;
-    }
-    public Boolean Finished()
-    {
-        return _status;
-    }
-
-    // Methods
-    public override void ListGoal(int i)
-    {
-        if (Finished() == false)
+        Count++;
+        if (Count >= Target)
         {
-            Console.WriteLine($"{i}. [ ] {GetName()} ({GetDescription()})  --  Currently Completed: {GetCount()}/{GetTimes()}");
-        }
-        else if (Finished() == true)
-        {
-            Console.WriteLine($"{i}. [X] {GetName()} ({GetDescription()})  --  Completed: {GetCount()}/{GetTimes()}");
-        }
-
-    }
-    public override string SaveGoal()
-    {
-        return ($"{_type}; {GetName()}; {GetDescription()}; {GetPoints()}; {_status}; {GetTimes()}; {GetBonusPoints()}; {GetCount()}");
-    }
-    public override string LoadGoal()
-    {
-        return ($"Simple Goal:; {GetName()}; {GetDescription()}; {GetPoints()}; {_status}; {GetTimes()}; {GetBonusPoints()}; {GetCount()}");
-    }
-    public override void RecordGoalEvent(List<Goal> goals)
-    {
-        SetTimes();
-        int points = GetPoints();
-
-        if (_count == _numberTimes)
-        {
-            _status = true;
-            points = points + _bonusPoints;
-  
-            Console.WriteLine($"Congratulations! You have earned {points} points!");
-        }
-        else
-        {
-            Console.WriteLine($"Congratulations! You have earned {GetPoints()} points!");
+            Points += Value;
+            IsCompleted = true;
         }
     }
-
 }
+
+public class GoalTracker
+{
+    private List<Goal> goals = new List<Goal>();
+
+    public void CreateSimpleGoal(string name, int value, int points)
+    {
+        goals.Add(new SimpleGoal(name, value, points));
+    }
+
+    public void CreateEternalGoal(string name, int value, int points)
+    {
+        goals.Add(new EternalGoal(name, value, points));
+    }
+
+    public void CreateChecklistGoal(string name, int value, int points, int target)
+    {
+        goals.Add(new ChecklistGoal(name, value, points, target));
+    }
+
+    public void RecordEvent(string name)
+    {
+        Goal goal = goals.Find(g => g.Name == name);
+        if (goal != null)
+        {
+            goal.MarkCompleted();
+        }
+    }
+
+    public int GetScore()
+    {
+        int score = 0;
+        foreach (Goal goal in goals)
+        {
+            if (goal.IsCompleted)
+            {
+                score += goal.Points;
+            }
+        }
+        return score;
+    }
+
+    public List<string> GetGoalList()
+    {
+        List<string> goalList = new List<string>();
+        foreach (Goal goal in goals)
+        {
+            string status = goal.IsCompleted ? "[X]" : "[ ]";
+            if (goal is ChecklistGoal)
+            {
+                status += $" Completed {((ChecklistGoal)goal).Count}/{((ChecklistGoal)goal).Target} times";
+            }
+            goalList.Add($"{status} {goal.Name} ({goal.Points
