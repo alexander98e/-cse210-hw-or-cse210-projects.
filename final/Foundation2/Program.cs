@@ -1,3 +1,5 @@
+//example of abstraction, to understand the definition and how to apply it
+
 namespace AnimalFarm
 {
     using System;

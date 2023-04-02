@@ -1,50 +1,63 @@
 using System;
-using System.Text;
-
-namespace Tutlane
+//example of polymorphism, to understand the definition and how to apply it
+namespace RealTimeMethodOverriding
 {
-    public class Laptop
+    public class User
     {
-       private string brand;
-       private string model;
-       public string Brand
-       {
-          get { return brand; }
-          set { brand = value; }
-       }
-       public string Model
-       {
-          get { return model; }
-          set { model = value; }
-       }
-       public void LaptopDetails()
-       {
-          Console.WriteLine("Brand: " + Brand);
-          Console.WriteLine("Model: " + Model);
-       }
-       public void LaptopKeyboard()
-       {
-          Console.WriteLine("Type using Keyword");
-       }
-       private void MotherBoardInfo()
-       {
-          Console.WriteLine("MotheBoard Information");
-       }
-       private void InternalProcessor()
-       {
-          Console.WriteLine("Processor Information");
-       }
+        public virtual void UserLogin(string uname, string password, string role)
+        {
+            if (role == "user" && (uname == "user" && password == "user@123"))
+            {
+                Console.WriteLine("{0} is valid and Loged sucessfully.........", role);
+            }
+            else
+            {
+                Console.WriteLine("Invalid User Name or Password!");
+            }
+        }
     }
+
+    public class Admin : User
+    {
+        public override void UserLogin(string uname, string password, string role)
+        {
+            if (role == "Admin" && (uname == "Admin" && password == "admin@123"))
+            {
+                Console.WriteLine("{0} is valid and Loged sucessfully.........", role);
+            }
+            else
+            {
+                Console.WriteLine("Invalid User Name or Password!");
+            }
+        }
+
+    }
+    public class SuperAdmin : User
+    {
+        public override void UserLogin(string uname, string password, string role)
+        {
+            if (role == "SuperAdmin" && (uname == "SuperAdmin" && password == "admin@123"))
+            {
+                Console.WriteLine("{0} is valid and Loged sucessfully.........", role);
+            }
+            else
+            {
+                Console.WriteLine("Invalid User Name or Password!");
+            }
+        }
+    }
+
     class Program
     {
-       static void Main(string[] args)
-       {
-          Laptop l = new Laptop();
-          l.Brand = "Dell";
-          l.Model = "Inspiron 14R";
-          l.LaptopDetails();
-          Console.WriteLine("\nPress Enter Key to Exit..");
-          Console.ReadLine();
-       }
+
+        static void Main(string[] args)
+        {
+            User user;
+            user = new Admin();
+            user.UserLogin("Admin", "admin@123", "Admin");
+            user = new SuperAdmin();
+            user.UserLogin("SuperAdmin", "admin@123", "SuperAdmin");            
+            Console.ReadLine();
+        }
     }
 }
