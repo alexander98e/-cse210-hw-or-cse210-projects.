@@ -1,5 +1,6 @@
 using System;
-
+// Dear Brother Duane Richards
+// This is the final project "open-ended project"
 namespace ShapeProgram
 {
     abstract class Shape
